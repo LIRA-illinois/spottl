@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "spot-tl"
+version = "0.1.0"
+description = "Pip-installable version of spot library"
+authors = ["Mikihisa Yuasa <myuasa2@illinois.edu>"]
+license = "gnp"
+readme = "README.md"
+packages = [{include = "spot_tl"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
