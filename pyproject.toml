@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "spottl"
-version = "0.1.0"
+version = "0.2.11.3"
 description = "Pip-installable version of spot library"
 authors = ["Mikihisa Yuasa <myuasa2@illinois.edu>"]
 license = "gnp"
