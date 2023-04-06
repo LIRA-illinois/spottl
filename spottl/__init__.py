@@ -46,14 +46,14 @@ for path in sys.path:
             __path__.append(path)
 
 
-from spot.impl import *
+from spottl.impl import *
 # spot.aux_ used to be called spot.aux until the filename aux.py
 # caused issues on Windows.  So the file is now named aux_.py, but we
 # still want to import it as spot.aux, hence we add it to spot.modules
 # as an alias.
-import spot.aux_ as aux
+import spottl.aux_ as aux
 sys.modules['spot.aux'] = aux
-from spot.aux import \
+from spottl.aux import \
      extend as _extend, \
      str_to_svg as _str_to_svg, \
      ostream_to_svg as _ostream_to_svg
@@ -144,7 +144,7 @@ class aig:
         return _ostream_to_svg(ostr)
 
     def show(self, opt=None):
-        from spot.jupyter import SVG
+        from spottl.jupyter import SVG
         return SVG(self._repr_svg_(opt))
 
     def to_str(self, format='circuit', opt=None):
@@ -216,7 +216,7 @@ class twa:
         # Load the SVG function only if we need it. This way the
         # bindings can still be used outside of IPython if IPython is
         # not installed.
-        from spot.jupyter import SVG
+        from spottl.jupyter import SVG
         return SVG(self._repr_svg_(opt))
 
     def highlight_states(self, states, color):
@@ -277,7 +277,7 @@ class twa_graph:
     def show_storage(self, opt=None):
         ostr = ostringstream()
         self.dump_storage_as_dot(ostr, opt)
-        from spot.jupyter import SVG
+        from spottl.jupyter import SVG
         return SVG(_ostream_to_svg(ostr))
 
     def __copy__(self):
@@ -285,7 +285,7 @@ class twa_graph:
 
 
 def make_twa_graph(*args):
-    from spot.impl import make_twa_graph as mtg
+    from spottl.impl import make_twa_graph as mtg
     if len(args) == 0:
         return mtg(_bdd_dict)
     return mtg(*args)
@@ -305,7 +305,7 @@ class formula:
         # Load the SVG function only if we need it. This way the bindings
         # can still be used outside of IPython if IPython is not
         # installed.
-        from spot.jupyter import SVG
+        from spottl.jupyter import SVG
         return SVG(_str_to_svg(self.to_str('d')))
 
     def _repr_latex_(self):
@@ -1272,7 +1272,7 @@ def sat_minimize(aut, acc=None, colored=False,
     if sat_incr:
         args += ',sat-incr=' + str(sat_incr)
         args += ',sat-incr-steps=' + str(sat_incr_steps)
-    from spot.impl import sat_minimize as sm
+    from spottl.impl import sat_minimize as sm
 
     if display_log or return_log:
         import pandas as pd
@@ -1294,17 +1294,17 @@ def sat_minimize(aut, acc=None, colored=False,
 
 
 def parse_word(word, dic=_bdd_dict):
-    from spot.impl import parse_word as pw
+    from spottl.impl import parse_word as pw
     return pw(word, dic)
 
 
 def bdd_to_formula(b, dic=_bdd_dict):
-    from spot.impl import bdd_to_formula as bf
+    from spottl.impl import bdd_to_formula as bf
     return bf(b, dic)
 
 
 def language_containment_checker(dic=_bdd_dict):
-    from spot.impl import language_containment_checker as c
+    from spottl.impl import language_containment_checker as c
     c.contains = lambda this, a, b: c.contained(this, b, a)
     c.are_equivalent = lambda this, a, b: c.equal(this, a, b)
     return c(dic)
@@ -1368,7 +1368,7 @@ def show_mp_hierarchy(cl):
     Return a picture of the Manna & Pnueli hierarchy as an SVG object
     in the IPython/Jupyter.
     """
-    from spot.jupyter import SVG
+    from spottl.jupyter import SVG
     return SVG(mp_hierarchy_svg(cl))
 
 
@@ -1477,7 +1477,7 @@ class twa_word:
         """
         Display the word as an SVG picture of signals.
         """
-        from spot.jupyter import SVG
+        from spottl.jupyter import SVG
         return SVG(self.as_svg())
 
 

@@ -65,7 +65,7 @@ class _SwigNonDynamicMeta(type):
 
 
 SHARED_PTR_DISOWN = _gen.SHARED_PTR_DISOWN
-import spot.impl
+import spottl.impl
 AUT_BEGIN = _gen.AUT_BEGIN
 AUT_KS_NCA = _gen.AUT_KS_NCA
 AUT_L_NBA = _gen.AUT_L_NBA
@@ -202,7 +202,7 @@ def ltl_patterns(*args):
 # seem to work correctly.  See https://github.com/swig/swig/issues/980
 def aut_pattern(pattern: 'spot::gen::aut_pattern_id', n: 'int',
                 dict: 'spot::bdd_dict_ptr' = None) -> "spot::twa_graph_ptr":
-  return _gen.aut_pattern(pattern, n, dict or spot._bdd_dict)
+  return _gen.aut_pattern(pattern, n, dict or spottl._bdd_dict)
 
 
 def aut_patterns(*args):

@@ -64,7 +64,7 @@ class _SwigNonDynamicMeta(type):
     __setattr__ = _swig_setattr_nondynamic_class_variable(type.__setattr__)
 
 
-import spot.impl
+import spottl.impl
 SHARED_PTR_DISOWN = _ltsmin.SHARED_PTR_DISOWN
 class model(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -89,7 +89,7 @@ _ltsmin.model_swigregister(model)
 model_load = _ltsmin.model_load
 
 
-import spot_tl as spot
+import spottl as spot
 import sys
 import subprocess
 import os.path
@@ -113,14 +113,14 @@ def load(filename):
       filename = dst
   return model.load(filename)
 
-@spot._extend(model)
+@spottl._extend(model)
 class model:
-  def kripke(self, ap_set, dict=spot._bdd_dict,
-	      dead=spot.formula_ap('dead'),
+  def kripke(self, ap_set, dict=spottl._bdd_dict,
+	      dead=spottl.formula_ap('dead'),
 	      compress=2):
-    s = spot.atomic_prop_set()
+    s = spottl.atomic_prop_set()
     for ap in ap_set:
-      s.insert(spot.formula_ap(ap))
+      s.insert(spottl.formula_ap(ap))
     return self.kripke_raw(s, dict, dead, compress)
 
   def info(self):
@@ -197,7 +197,7 @@ try:
         def dve(self, line, cell):
             if not line:
                raise ValueError("missing variable name for %%dve")
-            with spot.aux.tmpdir():
+            with spottl.aux.tmpdir():
                with tempfile.NamedTemporaryFile(dir='.', suffix='.dve') as t:
                    t.write(cell.encode('utf-8'))
                    t.flush()
@@ -212,8 +212,8 @@ try:
                        p.check_returncode()
                        self.shell.user_ns[line] = load(t.name + '2C')
                    finally:
-                       spot.aux.rm_f(t.name + '.cpp')
-                       spot.aux.rm_f(t.name + '2C')
+                       spottl.aux.rm_f(t.name + '.cpp')
+                       spottl.aux.rm_f(t.name + '2C')
 
     @magics_class
     class EditPML(Magics):
@@ -222,15 +222,15 @@ try:
         def pml(self, line, cell):
             if not line:
                raise ValueError("missing variable name for %%pml")
-            with spot.aux.tmpdir():
+            with spottl.aux.tmpdir():
                with tempfile.NamedTemporaryFile(dir='.', suffix='.pml') as t:
                    t.write(cell.encode('utf-8'))
                    t.flush()
                    try:
                        self.shell.user_ns[line] = load(t.name)
                    finally:
-                       spot.aux.rm_f(t.name + '.spins.c')
-                       spot.aux.rm_f(t.name + '.spins')
+                       spottl.aux.rm_f(t.name + '.spins.c')
+                       spottl.aux.rm_f(t.name + '.spins')
 
     ip = get_ipython()
     ip.register_magics(EditDVE)
