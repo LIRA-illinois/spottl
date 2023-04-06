@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "spot-tl"
+name = "spottl"
 version = "0.1.0"
 description = "Pip-installable version of spot library"
 authors = ["Mikihisa Yuasa <myuasa2@illinois.edu>"]
 license = "gnp"
 readme = "README.md"
-packages = [{include = "spot-tl"}]
+packages = [{include = "spottl"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
