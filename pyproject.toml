@@ -5,7 +5,7 @@ description = "Pip-installable version of spot library"
 authors = ["Mikihisa Yuasa <myuasa2@illinois.edu>"]
 license = "gnp"
 readme = "README.md"
-packages = [{include = "spot_tl"}]
+packages = [{include = "spot-tl"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
