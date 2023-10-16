@@ -1,1 +1,1 @@
-import spottl
+import spot

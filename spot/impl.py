@@ -108,7 +108,7 @@ class SwigPyIterator(object):
 
 # Register SwigPyIterator in _impl:
 _impl.SwigPyIterator_swigregister(SwigPyIterator)
-import spottl.buddy
+import spot.buddy
 
 
 class parse_error(object):

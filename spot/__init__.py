@@ -46,7 +46,7 @@ for path in sys.path:
             __path__.append(path)
 
 
-from spottl.impl import (
+from spot.impl import (
     make_bdd_dict,
     formula,
     option_map,
@@ -63,10 +63,10 @@ from spottl.impl import (
 # caused issues on Windows.  So the file is now named aux_.py, but we
 # still want to import it as spot.aux, hence we add it to spot.modules
 # as an alias.
-import spottl.aux_ as aux
+import spot.aux_ as aux
 
 sys.modules["spot.aux"] = aux
-from spottl.aux_ import (
+from spot.aux_ import (
     extend as _extend,
     str_to_svg as _str_to_svg,
     ostream_to_svg as _ostream_to_svg,
@@ -198,7 +198,7 @@ class aig:
         return _ostream_to_svg(ostr)
 
     def show(self, opt=None):
-        from spottl.jupyter import SVG
+        from spot.jupyter import SVG
 
         return SVG(self._repr_svg_(opt))
 
