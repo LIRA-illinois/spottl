@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "spot"}]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
+python = "^3.10,<3.12"
 
 
 [tool.poetry.group.dev.dependencies]
