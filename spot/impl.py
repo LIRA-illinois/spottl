@@ -1471,7 +1471,6 @@ class acc_cond(object):
     thisown = property(
         lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag"
     )
-    has_parity_prefix = _swig_new_instance_method(_impl.acc_cond_has_parity_prefix)
     acc_op_Inf = _impl.acc_cond_acc_op_Inf
     acc_op_Fin = _impl.acc_cond_acc_op_Fin
     acc_op_InfNeg = _impl.acc_cond_acc_op_InfNeg
@@ -1516,7 +1515,6 @@ class acc_cond(object):
     is_generalized_streett = _swig_new_instance_method(
         _impl.acc_cond_is_generalized_streett
     )
-    is_parity_max_equiv = _swig_new_instance_method(_impl.acc_cond_is_parity_max_equiv)
     is_parity = _swig_new_instance_method(_impl.acc_cond_is_parity)
     unit_propagation = _swig_new_instance_method(_impl.acc_cond_unit_propagation)
     unsat_mark = _swig_new_instance_method(_impl.acc_cond_unsat_mark)
@@ -1530,10 +1528,6 @@ class acc_cond(object):
     mark = _swig_new_instance_method(_impl.acc_cond_mark)
     comp = _swig_new_instance_method(_impl.acc_cond_comp)
     all_sets = _swig_new_instance_method(_impl.acc_cond_all_sets)
-    apply_permutation = _swig_new_instance_method(_impl.acc_cond_apply_permutation)
-    apply_permutation_aux = _swig_new_instance_method(
-        _impl.acc_cond_apply_permutation_aux
-    )
     accepting = _swig_new_instance_method(_impl.acc_cond_accepting)
     inf_satisfiable = _swig_new_instance_method(_impl.acc_cond_inf_satisfiable)
     maybe_accepting = _swig_new_instance_method(_impl.acc_cond_maybe_accepting)
@@ -1564,7 +1558,6 @@ class mark_t(object):
     thisown = property(
         lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag"
     )
-    apply_permutation = _swig_new_instance_method(_impl.mark_t_apply_permutation)
     max_accsets = _swig_new_static_method(_impl.mark_t_max_accsets)
     all = _swig_new_static_method(_impl.mark_t_all)
     hash = _swig_new_instance_method(_impl.mark_t_hash)
@@ -1626,8 +1619,6 @@ class acc_code(object):
         lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag"
     )
     unit_propagation = _swig_new_instance_method(_impl.acc_code_unit_propagation)
-    has_parity_prefix = _swig_new_instance_method(_impl.acc_code_has_parity_prefix)
-    is_parity_max_equiv = _swig_new_instance_method(_impl.acc_code_is_parity_max_equiv)
     __eq__ = _swig_new_instance_method(_impl.acc_code___eq__)
     __lt__ = _swig_new_instance_method(_impl.acc_code___lt__)
     __gt__ = _swig_new_instance_method(_impl.acc_code___gt__)
@@ -2668,7 +2659,6 @@ class twa_graph(twa):
         lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag"
     )
     __repr__ = _swig_repr
-    apply_permutation = _swig_new_instance_method(_impl.twa_graph_apply_permutation)
 
     def __init__(self, *args):
         _impl.twa_graph_swiginit(self, _impl.new_twa_graph(*args))

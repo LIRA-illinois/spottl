@@ -128,7 +128,7 @@ from spot.impl import (
 import spot.aux_ as aux
 
 sys.modules["spot.aux"] = aux
-from spot.aux_ import (
+from spot.aux import (
     extend as _extend,
     str_to_svg as _str_to_svg,
     ostream_to_svg as _ostream_to_svg,

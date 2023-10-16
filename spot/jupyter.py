@@ -23,6 +23,7 @@ Auxiliary functions for Spot's Python bindings.
 
 from IPython.display import display, HTML, DisplayObject
 
+
 class SVG(DisplayObject):
     """
     Replacement for IPython.display.SVG that does not use
@@ -36,8 +37,10 @@ class SVG(DisplayObject):
     We do not need the <svg> extraction when processing
     GraphViz output.
     """
+
     def _repr_svg_(self):
         return self.data
+
 
 def display_inline(*args, per_row=None, show=None):
     """
@@ -47,23 +50,24 @@ def display_inline(*args, per_row=None, show=None):
     If the `per_row` argument is given, at most `per_row` arguments are
     displayed on each row, each one taking 1/per_row of the line width.
     """
-    width = res = ''
+    width = res = ""
     if per_row:
-        width = 'width:{}%;'.format(100//per_row)
+        width = "width:{}%;".format(100 // per_row)
     for arg in args:
-        dpy = 'inline-block'
-        if show is not None and hasattr(arg, 'show'):
+        dpy = "inline-block"
+        if show is not None and hasattr(arg, "show"):
             rep = arg.show(show)._repr_svg_()
-        elif hasattr(arg, '_repr_svg_'):
+        elif hasattr(arg, "_repr_svg_"):
             rep = arg._repr_svg_()
-        elif hasattr(arg, '_repr_html_'):
+        elif hasattr(arg, "_repr_html_"):
             rep = arg._repr_html_()
-        elif hasattr(arg, '_repr_latex_'):
+        elif hasattr(arg, "_repr_latex_"):
             rep = arg._repr_latex_()
             if not per_row:
-                dpy = 'inline'
+                dpy = "inline"
         else:
             rep = str(arg)
-        res += ("<div style='vertical-align:text-top;display:{};{}'>{}</div>"
-                .format(dpy, width, rep))
+        res += "<div style='vertical-align:text-top;display:{};{}'>{}</div>".format(
+            dpy, width, rep
+        )
     display(HTML(res))
