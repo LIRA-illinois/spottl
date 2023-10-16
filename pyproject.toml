@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "spottl"
-version = "0.2.11.3"
+version = "2.11.6"
 description = "Pip-installable version of spot library"
 authors = ["Mikihisa Yuasa <myuasa2@illinois.edu>"]
 license = "gnp"
@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "spottl"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.12"
 
 
 [tool.poetry.group.dev.dependencies]
