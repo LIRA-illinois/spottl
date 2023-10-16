@@ -46,7 +46,18 @@ for path in sys.path:
             __path__.append(path)
 
 
-from spottl.impl import *
+from spottl.impl import (
+    make_bdd_dict,
+    formula,
+    option_map,
+    trival,
+    aig,
+    ostringstream,
+    print_dot,
+    print_aiger,
+    twa,
+    ta,
+)
 
 # spot.aux_ used to be called spot.aux until the filename aux.py
 # caused issues on Windows.  So the file is now named aux_.py, but we
@@ -187,7 +198,7 @@ class aig:
         return _ostream_to_svg(ostr)
 
     def show(self, opt=None):
-        from spot.jupyter import SVG
+        from spottl.jupyter import SVG
 
         return SVG(self._repr_svg_(opt))
 
