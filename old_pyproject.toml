@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "spottl"
+version = "2.11.6"
+description = "Pip-installable version of spot library"
+authors = ["Mikihisa Yuasa <myuasa2@illinois.edu>"]
+license = "gnp"
+readme = "README.md"
+packages = [{ include = "spot" }]
+
+[tool.poetry.dependencies]
+python = "^3.10,<3.14"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+auditwheel = "^6.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
