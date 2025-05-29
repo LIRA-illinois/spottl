@@ -2,16 +2,6 @@ import os
 import sys
 import unittest
 
-# Add the spot directory containing libspot.so to the library path
-spot_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "spot"))
-print(f"Adding {spot_dir} to sys.path")
-sys.path.append(spot_dir)
-if sys.platform == "win32":
-    os.add_dll_directory(spot_dir)
-else:
-    os.environ["LD_LIBRARY_PATH"] = (
-        spot_dir + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
-    )
 import spot
 from spot import twa
 
