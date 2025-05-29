@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-2022  Laboratoire de
-# Recherche et Développement de l'Epita (LRDE).
+# Copyright (C) by the Spot authors, see the AUTHORS file for details.
 #
 # This file is part of Spot, a model checking library.
 #
@@ -20,14 +19,36 @@
 
 import sys
 
-if sys.hexversion < 0x03030000:
-    sys.exit("This module requires Python 3.3 or newer")
+if sys.hexversion < 0x03060000:
+    sys.exit("This module requires Python 3.6 or newer")
 
-import subprocess
+import ctypes
 import os
 import signal
+import subprocess
 import tempfile
 from contextlib import suppress as _supress
+
+file_dir: str = os.path.dirname(__file__)
+sys.path.append(file_dir)
+os.environ["LD_LIBRARY_PATH"] = (
+    file_dir + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
+)
+
+
+# Read the dynamic libraries using ctypes in case $LD_LIBRARY_PATH is not set.
+def _load_lib(name):
+    """Load a shared library using ctypes."""
+    try:
+        return ctypes.CDLL(name)
+    except OSError as e:
+        raise ImportError(f"Failed to load library {name}: {e}") from e
+
+
+# Load the shared library for Spot.
+_libspot = _load_lib(os.path.join(file_dir, "libspot.so"))
+_libbddx = _load_lib(os.path.join(file_dir, "libbddx.so"))
+
 
 if "SPOT_UNINSTALLED" in os.environ:
     # When Spot is installed, _impl.so will be in the same directory as
@@ -39,103 +60,32 @@ if "SPOT_UNINSTALLED" in os.environ:
 # We may have third-party plugins that want to be loaded as "spot.xxx", but
 # that are installed in a different $prefix.  This sets things so that any
 # file that looks like spot-extra/xxx.py can be loaded with "import spot.xxx".
+# When libtool is used in a development build, it is likely that PYTHONPATH
+# is already set up to contains something like .../spot-extra/.libs, so we
+# want to copy those as well.
 for path in sys.path:
     if path not in __path__:
-        path += "/spot-extra"
-        if os.path.isdir(path):
+        if "/spot-extra" in path:
             __path__.append(path)
+        else:
+            path += "/spot-extra"
+            if os.path.isdir(path):
+                __path__.append(path)
 
-import spot.buddy as buddy
-import spot.impl as impl
-
-from spot.impl import (
-    make_bdd_dict,
-    formula,
-    option_map,
-    trival,
-    aig,
-    ostringstream,
-    print_dot,
-    print_aiger,
-    print_hoa,
-    twa,
-    ta,
-    twa_graph,
-    twa_prop_set,
-    atomic_prop_set,
-    parse_formula,
-    str_psl,
-    str_spin_ltl,
-    str_utf8_psl,
-    str_lbt_ltl,
-    str_wring_ltl,
-    str_latex_psl,
-    str_sclatex_psl,
-    print_dot_psl,
-    escape_html,
-    escape_rfc4180,
-    escape_str,
-    quote_shell_string,
-    op_ff,
-    op_tt,
-    op_eword,
-    op_ap,
-    op_Not,
-    op_X,
-    op_F,
-    op_G,
-    op_Closure,
-    op_NegClosure,
-    op_NegClosureMarked,
-    op_Xor,
-    op_Implies,
-    op_Equiv,
-    op_U,
-    op_R,
-    op_W,
-    op_M,
-    op_EConcat,
-    op_EConcatMarked,
-    op_UConcat,
-    op_Or,
-    op_OrRat,
-    op_And,
-    op_AndRat,
-    op_AndNLM,
-    op_Concat,
-    op_Fusion,
-    op_Star,
-    op_FStar,
-    acd,
-    zielonka_tree,
-    automaton_parser_options,
-    automaton_stream_parser,
-    postprocessor,
-    translator,
-    randltlgenerator,
-    tl_simplifier,
-    tl_simplifier_options,
-    synthesis_info,
-    twa_word,
-    scc_and_mark_filter,
-    to_parity_options,
-)
 
 # spot.aux_ used to be called spot.aux until the filename aux.py
 # caused issues on Windows.  So the file is now named aux_.py, but we
 # still want to import it as spot.aux, hence we add it to spot.modules
 # as an alias.
 import spot.aux_ as aux
+from spot.impl import *
 
 sys.modules["spot.aux"] = aux
-from spot.aux import (
-    extend as _extend,
-    str_to_svg as _str_to_svg,
-    ostream_to_svg as _ostream_to_svg,
-)
+from spot.aux import extend as _extend
+from spot.aux import ostream_to_svg as _ostream_to_svg
+from spot.aux import str_to_svg as _str_to_svg
 
-
-# The parrameters used by default when show() is called on an automaton.
+# The parameters used by default when show() is called on an automaton.
 _show_default = None
 
 
@@ -259,6 +209,10 @@ class aig:
         print_dot(ostr, self, opt)
         return _ostream_to_svg(ostr)
 
+    # see spot.jupyter.SVG for why we need _repr_html_ instead of _repr_svg_
+    def _repr_html_(self):
+        return self._repr_svg_()
+
     def show(self, opt=None):
         from spot.jupyter import SVG
 
@@ -325,6 +279,10 @@ class twa:
             opt = _show_default
         print_dot(ostr, self, opt)
         return _ostream_to_svg(ostr)
+
+    # see spot.jupyter.SVG for why we need _repr_html_ instead of _repr_svg_
+    def _repr_html_(self):
+        return self._repr_svg_()
 
     def show(self, opt=None):
         """Display the automaton as SVG, in the IPython/Jupyter notebook"""
@@ -458,8 +416,8 @@ class formula:
         elif format == "mathjax" or format == "j":
             return (
                 str_sclatex_psl(self, parenth)
-                .replace("``", "\\unicode{x201C}")
-                .replace("\\textrm{''}", "\\unicode{x201D}")
+                .replace("``", r"\unicode{x201C}")
+                .replace(r"\textrm{''}", r"\unicode{x201D}")
             )
         elif format == "dot" or format == "d":
             ostr = ostringstream()
@@ -469,6 +427,11 @@ class formula:
             raise ValueError("unknown string format: " + format)
 
     def __format__(self, spec):
+        # Some test case print this docstring, and different
+        # Python version will handled indentation differently.
+        # (Python versions before 3.13 don't strip indentation.)
+        # So we cannot indent this until Python 3.13 is thee
+        # smallest version we support.
         """Format the formula according to `spec`.
 
         Parameters
@@ -596,16 +559,16 @@ class formula:
 @_extend(atomic_prop_set)
 class atomic_prop_set:
     def _repr_latex_(self):
-        res = "$\{"
+        res = r"$\{"
         comma = ""
         for ap in self:
             apname = ap.to_str("j")
-            if not "\\unicode{" in apname:
-                apname = "\\unicode{x201C}" + apname + "\\unicode{x201D}"
+            if not r"\unicode{" in apname:
+                apname = r"\unicode{x201C}" + apname + r"\unicode{x201D}"
             res += comma
             comma = ", "
             res += apname
-        res += "\}$"
+        res += r"\}$"
         return res
 
 
@@ -616,6 +579,10 @@ class zielonka_tree:
         ostr = ostringstream()
         self.dot(ostr)
         return _ostream_to_svg(ostr)
+
+    # see spot.jupyter.SVG for why we need _repr_html_ instead of _repr_svg_
+    def _repr_html_(self):
+        return self._repr_svg_()
 
 
 _acdnum = 0
@@ -634,13 +601,15 @@ class acd:
         num = _acdnum
         _acdnum += 1
         style = """
-.acdhigh ellipse,.acdacc ellipse,.acdacc path,.acdacc polygon{stroke:green;}
-.acdhigh polygon,.acdrej ellipse,.acdrej path,.acdrej polygon{stroke:red;}
+.acdhigh ellipse,.acdacc ellipse{stroke:green;fill:rgb(220,255,220);}
+.acdhigh polygon,.acdrej ellipse{stroke:red;fill:rgb(255,220,220);}
+.acdacc polygon,.acdacc path{stroke:green;filter:drop-shadow(green 0 0 2px);}
+.acdrej polygon,.acdrej path{stroke:red;filter:drop-shadow(red 0 0 2px);}
 .acdbold ellipse,.acdbold polygon,.acdbold path{stroke-width:2;}
 .acdrej polygon{fill:red;}
 .acdacc polygon{fill:green;}
 """
-        js = """
+        js = f"""
 function acdremclasses(sel, classes) {{
 document.querySelectorAll(sel).forEach(n=>{{n.classList.remove(...classes)}});}}
 function acdaddclasses(sel, classes) {{
@@ -673,36 +642,32 @@ function acd{num}_node(node, acc){{
         acdaddclasses("#acdaut{num} .acdN" + node,
                       [acc ? "acdacc" : "acdrej", "acdbold"]);
         acdaddclasses("#acd{num} #N" + node, ["acdbold", "acdhigh"]);
-}};""".format(
-            num=num
-        )
+}};"""
         me = 0
         for n in range(self.node_count()):
             for e in self.edges_of_node(n):
                 me = max(e, me)
-                js += 'acdaddclasses("#acdaut{num} #E{e}", ["acdN{n}"]);\n'.format(
-                    num=num, e=e, n=n
-                )
+                js += f'acdaddclasses("#acdaut{num} #E{e}", ["acdN{n}"]);\n'
         for e in range(1, me + 1):
             js += (
-                'acdonclick("#acdaut{num} #E{e}",'
-                "function(){{acd{num}_edge({e});}});\n".format(num=num, e=e)
+                f'acdonclick("#acdaut{num} #E{e}",'
+                f"function(){{acd{num}_edge({e});}});\n"
             )
         for s in range(self.get_aut().num_states()):
             js += (
-                'acdonclick("#acdaut{num} #S{s}",'
-                "function(){{acd{num}_state({s});}});\n".format(num=num, s=s)
+                f'acdonclick("#acdaut{num} #S{s}",'
+                f"function(){{acd{num}_state({s});}});\n"
             )
         for n in range(self.node_count()):
             v = int(self.node_acceptance(n))
             js += (
-                'acdonclick("#acd{num} #N{n}",'
-                "function(){{acd{num}_node({n}, {v});}});\n".format(num=num, n=n, v=v)
+                f'acdonclick("#acd{num} #N{n}",'
+                f"function(){{acd{num}_node({n}, {v});}});\n"
             )
         html = "<style>{}</style><div>{}</div><div>{}</div><script>{}</script>".format(
             style,
-            self.get_aut().show(".i(acdaut{})".format(num)).data,
-            self._repr_svg_("acd{}".format(num)),
+            self.get_aut().show(f".i(acdaut{num})").data,
+            self._repr_svg_(f"acd{num}"),
             js,
         )
         return html
@@ -715,7 +680,8 @@ def automata(
     trust_hoa=True,
     no_sid=False,
     debug=False,
-    want_kripke=False
+    want_kripke=False,
+    drop_false_edges=True,
 ):
     """Read automata from a list of sources.
 
@@ -739,6 +705,9 @@ def automata(
         If True, the input is expected to discribe Kripke
         structures, in the HOA format, and the returned type
         will be of type kripke_graph_ptr.
+    drop_false_edges : bool, optional
+        If True (the default), edges labeled by false will
+        be ignored during parsing.
     no_sid : bool, optional
         When an automaton is obtained from a subprocess, this
         subprocess is started from a shell with its own session
@@ -799,6 +768,7 @@ def automata(
     o.trust_hoa = trust_hoa
     o.raise_errors = True
     o.want_kripke = want_kripke
+    o.drop_false_edges = drop_false_edges
 
     for filename in sources:
         try:
@@ -848,7 +818,7 @@ def automata(
             # returned by spot.automata() is destroyed.  Otherwise, _supress()
             # is just a dummy context manager that does nothing (Python 3.7
             # introduces nullcontext() for this purpose, but at the time of
-            # writing we support Python 3.4).
+            # writing we still have to support Python 3.6).
             mgr = proc if proc else _supress()
             with mgr:
                 while a:
@@ -868,7 +838,7 @@ def automata(
                 # an exception.
                 if ret and sys.exc_info()[0] is None:
                     raise subprocess.CalledProcessError(ret, filename[:-1])
-    # deleting o explicitly now prevents Python 3.5 from
+    # deleting o explicitly used to prevent Python 3.5 from
     # reporting the following error: "<built-in function
     # delete_automaton_parser_options> returned a result with
     # an error set".  It's not clear to me if the bug is in Python
@@ -884,7 +854,7 @@ def automaton(filename, **kwargs):
     try:
         return next(automata(filename, **kwargs))
     except StopIteration:
-        raise RuntimeError("Failed to read automaton from {}".format(filename))
+        raise RuntimeError(f"Failed to read automaton from {filename}")
 
 
 def aiger_circuits(*sources, bdd_dict=None):
@@ -916,7 +886,7 @@ def aiger_circuit(source, bdd_dict=None):
     try:
         return next(aiger_circuits(source, bdd_dict=bdd_dict))
     except StopIteration:
-        raise RuntimeError("Failed to read an aiger circuit " "from {}".format(source))
+        raise RuntimeError("Failed to read an aiger circuit " f"from {source}")
 
 
 def _postproc_translate_options(obj, default_type, *args):
@@ -934,7 +904,7 @@ def _postproc_translate_options(obj, default_type, *args):
     def type_set(val):
         nonlocal type_, type_name_
         if type_ is not None and type_name_ != val:
-            raise ValueError("type cannot be both {} and {}".format(type_name_, val))
+            raise ValueError(f"type cannot be both {type_name_} and {val}")
         elif val == "generic" or val == "gen" or val == "g":
             type_ = postprocessor.Generic
         elif val == "tgba":  # historical
@@ -977,9 +947,7 @@ def _postproc_translate_options(obj, default_type, *args):
     def pref_set(val):
         nonlocal pref_, pref_name_
         if pref_ is not None and pref_name_ != val:
-            raise ValueError(
-                "preference cannot be both {} and {}".format(pref_name_, val)
-            )
+            raise ValueError("preference cannot be both " f"{pref_name_} and {val}")
         elif val == "small":
             pref_ = postprocessor.Small
         elif val == "deterministic":
@@ -993,7 +961,7 @@ def _postproc_translate_options(obj, default_type, *args):
         nonlocal optm_, optm_name_
         if optm_ is not None and optm_name_ != val:
             raise ValueError(
-                "optimization level cannot be both {} and {}".format(optm_name_, val)
+                "optimization level cannot be both " f"{optm_name_} and {val}"
             )
         if val == "high":
             optm_ = postprocessor.High
@@ -1073,10 +1041,10 @@ def _postproc_translate_options(obj, default_type, *args):
             if lc == 1:
                 f(compat[0])
             elif lc < 1:
-                raise ValueError("unknown option '{}'".format(arg))
+                raise ValueError(f"unknown option '{arg}'")
             else:
                 raise ValueError(
-                    "ambiguous option '{}' is prefix of {}".format(arg, str(compat))
+                    f"ambiguous option '{arg}' " f"is prefix of {str(compat)}"
                 )
 
     if type_ is None:
@@ -1497,7 +1465,7 @@ def sat_minimize(
         import pandas as pd
 
         with tempfile.NamedTemporaryFile(dir=".", suffix=".satlog") as t:
-            args += ',log="{}"'.format(t.name)
+            args += f',log="{t.name}"'
             aut = sm(aut, args, state_based)
             dfrm = pd.read_csv(t.name, dtype=object)
             if display_log:
@@ -1558,6 +1526,12 @@ def bdd_to_formula(b, dic=_bdd_dict):
     return bf(b, dic)
 
 
+def bdd_to_cnf_formula(b, dic=_bdd_dict):
+    from spot.impl import bdd_to_cnf_formula as bf
+
+    return bf(b, dic)
+
+
 def language_containment_checker(dic=_bdd_dict):
     from spot.impl import language_containment_checker as c
 
@@ -1589,12 +1563,10 @@ def mp_hierarchy_svg(cl=None):
         "B": "110,198",
     }
     if cl in coords:
-        highlight = """<g transform="translate({})">
+        highlight = f"""<g transform="translate({coords[cl]})">
     <line x1="-10" y1="-10" x2="10" y2="10" stroke="red" stroke-width="5" />
     <line x1="-10" y1="10" x2="10" y2="-10" stroke="red" stroke-width="5" />
-    </g>""".format(
-            coords[cl]
-        )
+    </g>"""
     else:
         highlight = ""
     return (
@@ -1649,12 +1621,12 @@ class twa_word:
             res += bdd_to_formula(letter, bd).to_str("j")
         if len(res) > 1:
             res += "; "
-        res += "\\mathsf{cycle}\\{"
+        res += r"\mathsf{cycle}\{"
         for idx, letter in enumerate(self.cycle):
             if idx:
                 res += "; "
             res += bdd_to_formula(letter, bd).to_str("j")
-        return res + "\\}$"
+        return res + r"\}$"
 
     def as_svg(self):
         """
@@ -1733,7 +1705,7 @@ class twa_word:
                         x1=xpos * 50,
                         x2=(xpos + 1) * 50,
                         y=ypos * 50 + 25 - 20 * cur,
-                        **d
+                        **d,
                     )
                 last = cur
         if psize > 0:
