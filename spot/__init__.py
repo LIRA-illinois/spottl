@@ -46,8 +46,8 @@ def _load_lib(name):
 
 
 # Load the shared library for Spot.
-_libspot = _load_lib(os.path.join(file_dir, "libspot.so"))
-_libbddx = _load_lib(os.path.join(file_dir, "libbddx.so"))
+_libspot = _load_lib(os.path.join(file_dir, "libspot.so.0.0.0"))
+_libbddx = _load_lib(os.path.join(file_dir, "libbddx.so.0.0.0"))
 
 
 if "SPOT_UNINSTALLED" in os.environ:

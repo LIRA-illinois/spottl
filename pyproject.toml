@@ -1,6 +1,6 @@
 [project]
 name = "spottl"
-version = "2.13"
+version = "2.13.0.1"
 description = "\"Pip-installable version of spot library\""
 authors = [{ name = "Mikihisa Yuasa", email = "mik0915yua@outlook.com" }]
 license = { text = "GNP" }
