@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2016, 2019-2020 Laboratoire de Recherche et
-# Développement de l'Epita (LRDE).
+# Copyright (C) by the Spot authors, see the AUTHORS file for details.
 #
 # This file is part of Spot, a model checking library.
 #
@@ -38,16 +37,13 @@ def extend(*classes):
     Decorator that extends all the given classes with the contents
     of the class currently being defined.
     """
-
     def wrap(this):
         for cls in classes:
-            for name, val in this.__dict__.items():
-                if name not in ("__dict__", "__weakref__") and not (
-                    name == "__doc__" and val is None
-                ):
+            for (name, val) in this.__dict__.items():
+                if name not in ('__dict__', '__weakref__') \
+                   and not (name == '__doc__' and val is None):
                     setattr(cls, name, val)
         return classes[0]
-
     return wrap
 
 
@@ -55,16 +51,15 @@ def extend(*classes):
 # parameter is inverted.  https://gitlab.com/graphviz/graphviz/issues/1605
 # In our case, the scale parameters should both be <= 1, so we can
 # detect when that is not the case.
-svgscale_regex = re.compile('transform="scale\(([\d.]+) ([\d.]+)\) rotate')
-
+svgscale_regex = re.compile(r'transform="scale\(([\d.]+) ([\d.]+)\) rotate')
 
 def _gvfix(matchobj):
-    xs = float(matchobj.group(1))
-    ys = float(matchobj.group(2))
-    if xs >= 1 and ys >= 1:
-        xs = 1 / xs
-        ys = 1 / ys
-    return 'transform="scale({} {}) rotate'.format(xs, ys)
+        xs = float(matchobj.group(1))
+        ys = float(matchobj.group(2))
+        if xs >= 1 and ys >= 1:
+            xs = 1/xs
+            ys = 1/ys
+        return 'transform="scale({} {}) rotate'.format(xs, ys)
 
 
 # Add a small LRU cache so that when we display automata into a
@@ -76,32 +71,24 @@ def str_to_svg(str):
     Send some text to dot for conversion to SVG.
     """
     try:
-        dot = subprocess.Popen(
-            ["dot", "-Tsvg"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        dot = subprocess.Popen(['dot', '-Tsvg'],
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
     except FileNotFoundError:
-        print(
-            "The command 'dot' seems to be missing on your system.\n"
-            "Please install the GraphViz package "
-            "and make sure 'dot' is in your PATH.",
-            file=sys.stderr,
-        )
+        print("The command 'dot' seems to be missing on your system.\n"
+              "Please install the GraphViz package "
+              "and make sure 'dot' is in your PATH.", file=sys.stderr)
         raise
 
     stdout, stderr = dot.communicate(str)
     if stderr:
-        print(
-            "Calling 'dot' for the conversion to SVG produced the message:\n"
-            + stderr.decode("utf-8"),
-            file=sys.stderr,
-        )
+        print("Calling 'dot' for the conversion to SVG produced the message:\n"
+              + stderr.decode('utf-8'), file=sys.stderr)
     ret = dot.wait()
     if ret:
-        raise subprocess.CalledProcessError(ret, "dot")
-    out = stdout.decode("utf-8")
+        raise subprocess.CalledProcessError(ret, 'dot')
+    out = stdout.decode('utf-8')
     return svgscale_regex.sub(_gvfix, out)
 
 
@@ -109,7 +96,7 @@ def ostream_to_svg(ostr):
     """
     Encode an ostringstream as utf-8 and send it to dot for cocnversion to SVG.
     """
-    return str_to_svg(ostr.str().encode("utf-8"))
+    return str_to_svg(ostr.str().encode('utf-8'))
 
 
 def rm_f(filename):
@@ -126,7 +113,7 @@ def rm_f(filename):
 @contextlib.contextmanager
 def tmpdir():
     cwd = os.getcwd()
-    tmpdir = os.environ.get("SPOT_TMPDIR") or os.environ.get("TMPDIR") or "."
+    tmpdir = os.environ.get('SPOT_TMPDIR') or os.environ.get('TMPDIR') or '.'
     try:
         os.chdir(tmpdir)
         yield

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2018 Laboratoire de Recherche et Développement de l'Epita
-# (LRDE).
+# Copyright (C) by the Spot authors, see the AUTHORS file for details.
 #
 # This file is part of Spot, a model checking library.
 #
@@ -23,24 +22,26 @@ Auxiliary functions for Spot's Python bindings.
 
 from IPython.display import display, HTML, DisplayObject
 
-
 class SVG(DisplayObject):
-    """
-    Replacement for IPython.display.SVG that does not use
+    """Replacement for IPython.display.SVG that does not use
     minidom to extract the <svg> element.
 
-    We need that because prior to Python 3.8, minidom used
-    sort all attributes, and in Python 3.8 this was changed
-    to keep the same order, causing test failures in our
-    diff-based test suite.
+    We need that because prior to Python 3.8, minidom used sort all
+    attributes, and in Python 3.8 this was changed to keep the same
+    order, causing test failures in our diff-based test suite.
 
     We do not need the <svg> extraction when processing
     GraphViz output.
+
+    Also nowadays Jupyter Notebook 7 started to render <svg> as inline
+    <img> instead of inlining the <svg> directly, breaking many useful
+    usages of SVG in the name of easier copy/paste.
+
+    https://github.com/jupyter/notebook/issues/7114
+    https://github.com/jupyterlab/jupyterlab/issues/10464
     """
-
-    def _repr_svg_(self):
+    def _repr_html_(self):
         return self.data
-
 
 def display_inline(*args, per_row=None, show=None):
     """
@@ -50,24 +51,22 @@ def display_inline(*args, per_row=None, show=None):
     If the `per_row` argument is given, at most `per_row` arguments are
     displayed on each row, each one taking 1/per_row of the line width.
     """
-    width = res = ""
+    w = res = ''
     if per_row:
-        width = "width:{}%;".format(100 // per_row)
+        w = f'width:{100//per_row}%;'
     for arg in args:
-        dpy = "inline-block"
-        if show is not None and hasattr(arg, "show"):
-            rep = arg.show(show)._repr_svg_()
-        elif hasattr(arg, "_repr_svg_"):
-            rep = arg._repr_svg_()
-        elif hasattr(arg, "_repr_html_"):
+        dpy = 'display:inline-block'
+        if show is not None and hasattr(arg, 'show'):
+            arg = arg.show(show)
+        if hasattr(arg, '_repr_html_'):
             rep = arg._repr_html_()
-        elif hasattr(arg, "_repr_latex_"):
+        elif hasattr(arg, '_repr_svg_'):
+            rep = arg._repr_svg_()
+        elif hasattr(arg, '_repr_latex_'):
             rep = arg._repr_latex_()
             if not per_row:
-                dpy = "inline"
+                dpy = 'display:inline'
         else:
             rep = str(arg)
-        res += "<div style='vertical-align:text-top;display:{};{}'>{}</div>".format(
-            dpy, width, rep
-        )
+        res += f"<div style='vertical-align:text-top;{dpy};{w}'>{rep}</div>"
     display(HTML(res))
